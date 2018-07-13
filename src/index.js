@@ -2,6 +2,8 @@
 //require('./chapter1.js');
 
 
-import {renderDailyShowGuestTable} from ('./chapter2.js');
-renderDailyShowGuestTable();
+import ch2, {renderDailyShowGuestTable} from './chapter2.js';
 
+ch2();
+
+renderDailyShowGuestTable();

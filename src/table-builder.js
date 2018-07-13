@@ -1,3 +1,59 @@
+let d3 = require('d3');
+
+export class TableBuilder{
+    constructor(url){
+        this.load(url);
+        this.table = d3.select('body')
+            .append('table')
+            .attr('class','table');
+        this.tabelHeader = this.table.append('thead');
+        this.tableBody = this.table.append('tbody');
+    }
+
+    load(url){
+        d3.csv(url,  (data)=>{
+            this.data = data;
+            this.redraw();
+        })
+    }
+
+    redraw(){
+        let nested = d3.nest()
+            .key(d=> d['Raw_Guest_List'])
+            .entries(this.data);
+        console.log(nested);
+        this.data = nested.map(d => {
+           let earliest = d.values.sort((a,b)=>d3.ascending(a.YEAR,b.YEAR)).shift();
+           //console.log(earliest);
+           let obj_ ={
+               name : d.key,
+               category: earliest.Group,
+               'earliest appearance':earliest.YEAR
+           };
+
+           return obj_;
+        });
+
+        this.rows = this.tableBody.selectAll('tr').data(this.data);
+        this.rows.enter().append('tr');
+        this.rows.exit().remove();
+
+        this.rows.selectAll('td')
+            .data((d) => d3.values(d))
+            .enter()
+            .append('td')
+            .text((d) => d);
+
+        //this.tableBody.selectAll('tr')
+        //    .sort((a,b)=>d3.ascending(a.Group,b.Group));
+
+    }
+
+}
+
+
+//OLD CLASS USED FOR LIVE MANIPULATION IN BROWSER
+/*
 export class TableBuilder{
     constructor(rows){
         var d3 = require('d3');
@@ -26,4 +82,4 @@ export class TableBuilder{
 
         return table;
     }
-}
+}*/
