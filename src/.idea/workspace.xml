@@ -38,8 +38,8 @@
       <file leaf-file-name="chapter2.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/chapter2.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="745">
-              <caret line="132" column="41" selection-start-line="132" selection-start-column="41" selection-end-line="132" selection-end-column="41" />
+            <state relative-caret-position="435">
+              <caret line="29" column="9" lean-forward="true" selection-start-line="29" selection-start-column="9" selection-end-line="29" selection-end-column="9" />
               <folding>
                 <element signature="e#0#45#0" expanded="true" />
               </folding>
@@ -150,12 +150,12 @@
       <option name="presentableId" value="Default" />
       <updated>1531254705358</updated>
       <workItem from="1531254706634" duration="157000" />
-      <workItem from="1531254887650" duration="21067000" />
+      <workItem from="1531254887650" duration="22035000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21224000" />
+    <option name="totallyTimeSpent" value="22192000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="926" y="24" width="994" height="1056" extended-state="4" />
@@ -266,8 +266,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/chapter2.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="745">
-          <caret line="132" column="41" selection-start-line="132" selection-start-column="41" selection-end-line="132" selection-end-column="41" />
+        <state relative-caret-position="435">
+          <caret line="29" column="9" lean-forward="true" selection-start-line="29" selection-start-column="9" selection-end-line="29" selection-end-column="9" />
           <folding>
             <element signature="e#0#45#0" expanded="true" />
           </folding>

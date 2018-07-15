@@ -23,6 +23,31 @@ function arcExamples(){
 }
 export default function()
 {
+
+    let chart = new BasicChart();
+    let svg = chart.svg;
+    let g = svg.append('g')
+        .attr('transform',`translate(${chart.width/2},${chart.height/2})`);
+    g.selectAll('path')
+        .data([{
+            source: {
+                radius: 50,
+                startAngle: -Math.PI*0.30,
+                endAngle: -Math.PI*0.20
+            },
+            target: {
+                radius: 50,
+                startAngle: Math.PI*0.30,
+                endAngle: Math.PI*0.30}
+        }])
+        .enter()
+        .append('path')
+        .attr('d', d3.svg.chord());
+
+}
+
+function svgPathSymbolsArea()
+{
     let chart = new BasicChart();
     let svg = chart.svg;
 
@@ -117,6 +142,8 @@ export default function()
             'fill-opacity':0.3
         });
 
+
+
     let symbols = d3.svg.symbol()
         .type((d)=>d[1]>0?'triangle-down':'triangle-up')
         .size((d,i)=>i%2?0:64);
@@ -130,8 +157,16 @@ export default function()
             stroke:'steelblue', 'stroke-width':2, fill:'white'
         })
         .on('mouseover',()=>{
-            console.log(d3.select(this));
-            d3.select(this).attr('fill',"red")
+
+            let c =d3.event.target;
+            c.setAttribute('fill','red');
+
+        })
+        .on('mouseout',()=>{
+
+            let c =d3.event.target;
+            c.setAttribute('fill','white');
+
         })
         .attr('transform',(d)=>`translate(${xScale(d[0])},${yScale(d[1])})`);
 }
