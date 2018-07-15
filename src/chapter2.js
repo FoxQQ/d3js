@@ -3,23 +3,41 @@ import {BasicChart} from "./BasicChart";
 
 let d3 = require('d3');
 
+
+
+function arcExamples(){
+    let arc = d3.svg.arc();
+    let chart = new BasicChart();
+
+    let svg = chart.svg;
+
+    svg.append('path')
+        .attr('d', arc({
+            outerRadius:100,
+            innerRadius:50,
+            startAngle: Math.PI*0.25,
+            endAngle: Math.PI * -0.25
+        }))
+        .attr('transform',`translate(${chart.width/2},${chart.height/2})`)
+        .attr('fill','lightslategrey');
+}
 export default function()
 {
     let chart = new BasicChart();
     let svg = chart.svg;
 
-    let sine = d3.range(1,10);
-    console.log(sine);
+    let sine = d3.range(0,10);
+
 
     sine = sine.map((d)=>([d*Math.PI/2,Math.sin(d*Math.PI/2)]));
-    console.log(sine);
+
 
     let xScale = d3.scale.linear()
-        .range([0,chart.width])
-        .domain([0, d3.max(sine)[0]]);
+        .range([chart.margin.left,chart.width-chart.margin.right])
+        .domain(d3.extent(sine,(d)=>d[0]));
 
     let yScale = d3.scale.linear()
-        .range([chart.height,0])
+        .range([chart.height-chart.margin.bottom,chart.margin.top])
         .domain([-1,1]);
 
     svg.selectAll('circle')
@@ -29,9 +47,93 @@ export default function()
         .attr({
             cx:(d)=>xScale(d[0]),
             cy:(d)=>yScale(d[1]),
-            r:10
+            r:3
         });
-    console.log(yScale(1));
+
+
+    let line =d3.svg.line()
+        .x((d)=>xScale(d[0]))
+        .y((d)=>yScale(d[1]));
+
+    let g = svg.append('g');
+
+
+    g.append('path')
+        .datum(sine)
+        .attr('d', line)
+        .attr({
+            stroke:'steelblue',
+            'stroke-width':2,
+            fill:'none'
+        });
+
+    g.append('path')
+        .datum(sine)
+        .attr('d', line.interpolate('step-before'))
+        .attr({
+            stroke:'black',
+            'stroke-width':1,
+            fill:'none'
+        });
+
+    g.append('path')
+        .datum(sine)
+        .attr('d', line.interpolate('monotone'))
+        .attr({
+            stroke:'green',
+            'stroke-width':3,
+            fill:'none'
+        });
+    g.append('path')
+        .datum(sine)
+        .attr('d', line.interpolate('bundle'))
+        .attr({
+            stroke:'red',
+            'stroke-width':1,
+            fill:'none'
+        });
+
+    g.append('path')
+        .datum(sine)
+        .attr('d', line.interpolate('basis-closed'))
+        .attr({
+            stroke:'yellow',
+            'stroke-width':1,
+            fill:'none'
+        });
+
+    let g2 = svg.append('g');
+    let area = d3.svg.area()
+        .x((d)=>xScale(d[0]))
+        .y0(chart.height)
+        .y1((d)=>yScale(d[1]))
+        .interpolate('monotone');
+
+    g2.append('path')
+        .datum(sine)
+        .attr('d',area)
+        .attr({
+            fill:'steelblue',
+            'fill-opacity':0.3
+        });
+
+    let symbols = d3.svg.symbol()
+        .type((d)=>d[1]>0?'triangle-down':'triangle-up')
+        .size((d,i)=>i%2?0:64);
+
+    g2.selectAll('path')
+        .data(sine)
+        .enter()
+        .append('path')
+        .attr('d', symbols)
+        .attr({
+            stroke:'steelblue', 'stroke-width':2, fill:'white'
+        })
+        .on('mouseover',()=>{
+            console.log(d3.select(this));
+            d3.select(this).attr('fill',"red")
+        })
+        .attr('transform',(d)=>`translate(${xScale(d[0])},${yScale(d[1])})`);
 }
 
 export function garbage(){
