@@ -21,29 +21,131 @@ function arcExamples(){
         .attr('transform',`translate(${chart.width/2},${chart.height/2})`)
         .attr('fill','lightslategrey');
 }
-export default function()
+export default function() {
+    let chart = new BasicChart();
+    let svg = chart.svg;
+
+    let rings = 15,
+        slices = 20;
+    let colors = d3.scale.category20b();
+    let angle = d3.scale.linear()
+        .domain([0,slices])
+        .range([0,2 * Math.PI]);
+
+    let arc = d3.svg.arc()
+        .innerRadius((d)=> 10 + (d * 50/rings))
+        .outerRadius((d)=> 40 + (d*50/rings))
+        .startAngle((d,i,j)=>angle(i))
+        .endAngle((d,i,j)=>angle(j+1));
+
+    let shade = {
+        darker: (d, j) => d3.rgb(colors(j)).darker(d/rings),
+        brighter: (d, j) => d3.rgb(colors(j)).brighter(d/rings)
+    };
+
+    [
+        [100, 100, shade.darker],
+        [300, 100, shade.brighter]
+    ].forEach(function (conf) {
+        svg.append('g')
+            .attr('transform', `translate(${conf[0]}, ${conf[1]})`)
+            .selectAll('g')
+            .data(colors.range())
+            .enter()
+            .append('g')
+            .selectAll('path')
+            .data((d) => d3.range(0, rings))
+            .enter()
+            .append('path')
+            .attr('d', arc)
+            .attr('fill', (d, i, j) => conf[2](d, j));
+    });
+}
+export function axisDemo(){
+        require('./index.css');
+        let chart = new BasicChart();
+        let svg = chart.svg;
+        let x = d3.scale.linear()
+            .domain([0,100])
+            .range([chart.margin.left,chart.width-chart.margin.right]);
+        let axis = d3.svg.axis()
+            .scale(x);
+
+
+        let axes = [
+            d3.svg.axis().scale(x).orient('right'),
+            d3.svg.axis().scale(x).ticks(5),
+            d3.svg.axis().scale(x).tickSubdivide(8).tickSize(5,10,10),
+            d3.svg.axis().scale(x).tickValues([0,20,50,70,100])
+                .tickFormat((d,i)=>['a', 'e', 'i', 'o', 'u'][i]).orient('top')
+        ];
+
+        axes.forEach(function (axis,i){
+            let a = svg.append('g')
+                .attr('transform',`translate(0,${i*50+chart.margin.top})`)
+                .data(d3.range(0,100))
+                .classed('axis',true)
+                .classed('dotted', i%2==0)
+                .call(axis);
+
+
+        });
+}
+
+export function funWithPath()
 {
 
     let chart = new BasicChart();
     let svg = chart.svg;
     let g = svg.append('g')
         .attr('transform',`translate(${chart.width/2},${chart.height/2})`);
+    /*
     g.selectAll('path')
         .data([{
             source: {
                 radius: 50,
-                startAngle: -Math.PI*0.30,
-                endAngle: -Math.PI*0.20
+                startAngle: -Math.PI*0.9,
+                endAngle: -Math.PI*0.1
             },
             target: {
                 radius: 50,
-                startAngle: Math.PI*0.30,
-                endAngle: Math.PI*0.30}
+                startAngle: Math.PI*0.1,
+                endAngle: Math.PI*0.9}
         }])
         .enter()
         .append('path')
         .attr('d', d3.svg.chord());
+    */
+    let  data= d3.zip(d3.range(0,12),d3.shuffle(d3.range(0,12)));
+    console.log(data);
+    let chord = d3.svg.chord()
+        .source((d)=>d[0])
+        .target((d)=>d[1])
+        .radius(100)
+        .startAngle((d)=> -2*Math.PI * (1/data.length) * d)
+        .endAngle((d) => -2*Math.PI/data.length*((d-1)%data.length));
+    g.selectAll('path')
+        .data(data)
+        .enter()
+        .append('path')
+        .attr('d', chord)
+        .attr('fill', (d,i) => `rgb(${i*5},${i*20},${5*i})`)
+        .attr('stroke','black');
 
+    let g4 = svg.append('g')
+        .attr('transform', `translate(${30},${chart.height/2})`);
+    let moustache = [
+        {source: {x: 0, y: 0}, target: {x: 100, y: 100}},
+        {source: {x: 100, y: 100}, target: {x: 250, y: 120}},
+
+    ];
+
+    g4.selectAll('path')
+        .data(moustache)
+        .enter()
+        .append('path')
+        .attr('d', d3.svg.diagonal())
+        .attr({stroke:'black', fill: 'none'});
 }
 
 function svgPathSymbolsArea()

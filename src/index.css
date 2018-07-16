@@ -13,6 +13,23 @@ html, body{
     font-size: 8px;
 }
 
-.bar{
-    fill:steelblue;
+.bar {
+    fill: steelblue;
+
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
+.axis text {
+    font-size: 11px;
+}
+.axis.dotted line,
+.axis.dotted path {
+    stroke-dasharray: 0.9;
+    stroke:red;
 }
