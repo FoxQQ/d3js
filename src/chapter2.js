@@ -24,9 +24,30 @@ function arcExamples(){
 export default function() {
     let chart = new BasicChart();
     let svg = chart.svg;
+    let colors = ['#ff0000','#00ff00','#0000ff']
+    let g = svg.selectAll('g')
+        .append('g')
+        .attr('transform',`translate(${chart.width/2},${chart.height/2})`)
+        .selectAll('path')
+        .data([1,2,3])
+        .enter()
+        .append('path')
+        .attr('d', d3.svg.arc()
+            .innerRadius(0)
+            .outerRadius(100)
+            .startAngle((d,i)=>-2*i*Math.PI/i+i)
+            .endAngle((d,i)=>2*i*Math.PI/i+i+Math.PI/i)
+        )
+        .attr('fill',(d,i)=>colors[i]);
+
+}
+
+export function coloredArcs(){
+    let chart = new BasicChart();
+    let svg = chart.svg;
 
     let rings = 15,
-        slices = 20;
+        slices = 10;
     let colors = d3.scale.category20b();
     let angle = d3.scale.linear()
         .domain([0,slices])
