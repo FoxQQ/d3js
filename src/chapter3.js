@@ -1,3 +1,4 @@
+let topojson = require('topojson');
 let d3 = require('d3');
 import {BasicChart} from "./BasicChart";
 
@@ -223,15 +224,26 @@ class ScalesDemo extends BasicChart{
 
     }
 }
-
-export class geod3 extends BasicChart{
+export class GeoDemo extends BasicChart{
     constructor(data){
         super(data);
+        let chart = this.chart;
+
+        let projection = d3.geo.equirectangular()
+            .center([8, 56])
+            .scale(800);
+
+        let p1 = new Promise((resolve, reject) => {
+           d3.json('data/water.json', (err, data)=>{
+               err ? reject(err): resolve(data);
+            });
+        });
     }
 }
 
 export default function(){
-    console.log('v4');
+    console.log('geodata');
+    var geo = new GeoDemo();
     //var spirale = new UlamSpiral();
     //var scales = new ScalesDemo();
 

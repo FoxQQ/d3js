@@ -1,0 +1,5 @@
+bounds: -180 -85.19218750000005 180 90 (spherical)
+pre-quantization: 40.0m (0.000360°) 19.5m (0.000175°)
+topology: 1416 arcs, 60361 points
+post-quantization: 4.003km (0.0360°) 1.948km (0.0175°)
+prune: retained 1413 / 1416 arcs (100%)
