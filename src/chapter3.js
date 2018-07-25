@@ -1,5 +1,6 @@
 let topojson = require('topojson');
 let d3 = require('d3');
+require('./index.css');
 import {BasicChart} from "./BasicChart";
 
 export class UlamSpiral extends BasicChart{
@@ -238,7 +239,47 @@ export class GeoDemo extends BasicChart{
                err ? reject(err): resolve(data);
             });
         });
+
+        let p2 = new Promise((resolve, reject) => {
+            d3.json('data/land.json', (err, data) =>{
+                err ? reject(err) : resolve(data)
+            })
+        });
+
+        let p3 = new Promise((resolve, reject) => {
+            d3.json('data/ne_50m_admin_0_countries.topojson', (err, data) =>{
+                err ? reject(err) : resolve(data)
+            })
+        });
+
+        Promise.all([p1, p2, p3]).then((values)=>{
+           let [sea, land, cult] = values;
+           console.log(cult);
+
+           draw(sea, land, cult);
+        });
+
+        function addToMap(collection, key){
+            return chart.append('g')
+                .selectAll('path')
+                .data(topojson.feature(collection, collection.objects[key]).features)
+                .enter()
+                .append('path')
+                .attr('d',d3.geo.path().projection(projection))
+        }
+
+        function draw(sea, land, cult){
+            addToMap(sea, 'ne_50m_ocean')
+                .classed('ocean',true);
+            addToMap(land,'ne_50m_land')
+                .classed('land',true);
+            addToMap(cult, 'ne_50m_admin_0_countries')
+                .classed('admin',true);
+
+        }
     }
+
+
 }
 
 export default function(){

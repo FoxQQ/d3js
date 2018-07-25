@@ -33,3 +33,17 @@ html, body{
     stroke-dasharray: 0.9;
     stroke:red;
 }
+.ocean{
+    fill:#759dd1;
+}
+.land{
+    fill:saddlebrown;
+    stroke:black;
+    stroke-width: 1px;
+}
+.admin{
+    fill:none;
+
+    stroke:dimgrey;
+    stroke-width: 1px;
+}
