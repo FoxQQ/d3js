@@ -37,7 +37,7 @@ html, body{
     fill:#759dd1;
 }
 .land{
-    fill:saddlebrown;
+    fill:lightgoldenrodyellow;
     stroke:black;
     stroke-width: 1px;
 }
@@ -46,4 +46,16 @@ html, body{
 
     stroke:dimgrey;
     stroke-width: 1px;
+}
+.urban{
+    fill: saddlebrown;
+}
+.water{
+    fill:None;
+    stroke-width: 0.03em;
+    stroke:#1f77b4;
+}
+.route{
+    stroke-width: 0.5px;
+    stroke:indigo;
 }

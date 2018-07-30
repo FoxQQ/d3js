@@ -232,7 +232,7 @@ export class GeoDemo extends BasicChart{
 
         let projection = d3.geo.equirectangular()
             .center([8, 56])
-            .scale(800);
+            .scale(150);
 
         let p1 = new Promise((resolve, reject) => {
            d3.json('data/water.json', (err, data)=>{
@@ -252,12 +252,69 @@ export class GeoDemo extends BasicChart{
             })
         });
 
-        Promise.all([p1, p2, p3]).then((values)=>{
-           let [sea, land, cult] = values;
-           console.log(cult);
-
-           draw(sea, land, cult);
+        let p4 = new Promise((resolve, reject) => {
+           d3.json('data/cultural.json', (err, data) =>{
+                err ? reject(err) : resolve(data);
+               }
+           )
         });
+
+        let p5 = new Promise((resolve, reject)=>
+        {
+            d3.text('data/airports.dat', (err, data)=>
+            {
+               err ? reject(err) : resolve(data);
+            });
+        });
+
+        let p6 = new Promise((resolve, reject)=>
+        {
+            d3.csv('data/renditions.csv', (err, data)=>
+            {
+                err ? reject(err) : resolve(data);
+            });
+        });
+
+        Promise.all([p1, p2, p3, p4, p5, p6]).then((values)=>{
+           let [sea, land, cult, urban, airports, renditions] = values;
+           draw(sea, land, cult, urban);
+           addRenditions(airports, renditions);
+        });
+        function addRenditions(airports, renditions){
+            let a = {},
+                routes;
+
+            d3.csv.parseRows(airports).forEach(function(airport){
+                var id = airport[4];
+                a[id] = {
+                    lat:airport[6],
+                    lon:airport[7]
+                };
+            });
+
+            routes = renditions.map((v) => {
+                let dep = v['Departure Airport'],
+                    arr = v['Arrival Airport'];
+                return {
+                    from: a[dep],
+                    to: a[arr]
+                } ;
+            }).filter((v) => (v.to && v.from)).slice(0,100);
+            //console.log(routes);
+            let line = chart.selectAll('line')
+                .data(routes)
+                .enter()
+                .append('line')
+                .attr('x1', (d) => {
+                    //console.log(projection([d.from.lon, d.from.lat]));
+                    return projection([d.from.lon, d.from.lat])[0];
+                })
+                .attr('y1', (d) => projection([d.from.lon, d.from.lat])[1])
+                .attr('x2', (d) => projection([d.to.lon, d.to.lat])[0])
+                .attr('y2', (d) => projection([d.to.lon, d.to.lat])[1])
+                .classed('route',true);
+
+        }
 
         function addToMap(collection, key){
             return chart.append('g')
@@ -268,13 +325,17 @@ export class GeoDemo extends BasicChart{
                 .attr('d',d3.geo.path().projection(projection))
         }
 
-        function draw(sea, land, cult){
+        function draw(sea, land, cult, urban){
             addToMap(sea, 'ne_50m_ocean')
                 .classed('ocean',true);
             addToMap(land,'ne_50m_land')
                 .classed('land',true);
             addToMap(cult, 'ne_50m_admin_0_countries')
                 .classed('admin',true);
+            addToMap(urban, 'ne_10m_urban_areas')
+                .classed('urban', true);
+            addToMap(sea,'ne_50m_rivers_lake_centerlines')
+                .classed('water',true);
 
         }
     }
