@@ -14,6 +14,8 @@
 
 ///////////////chapter 4
 //EASES
-import {chapter4, Spirograph} from "./chapter4";
+import {chapter4, Spirograph, PrisonPopulationChart, InteractivePrisonChart} from "./chapter4";
 //new chapter4();
-new Spirograph();
+//new Spirograph();
+//new PrisonPopulationChart('./data/uk_prison_data_1900-2015.csv');
+new InteractivePrisonChart('./data/uk_prison_data_1900-2015.csv');

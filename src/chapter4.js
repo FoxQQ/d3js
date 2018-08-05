@@ -95,3 +95,85 @@ export class Spirograph extends BasicChart{
         let timer = d3.timer(step, 500);
     }
 }
+
+export class PrisonPopulationChart extends BasicChart {
+    constructor(path){
+        super();
+
+        this.margin.left = 50;
+        let d3 = require('d3');
+
+        let p = new Promise((res, rej) => {
+           d3.csv(path, (err, data) => err ? rej(err):res(data));
+        });
+
+        require('./index.css');
+
+        this.x = d3.scale.ordinal().rangeBands([this.margin.left, this.width], 0.1);
+
+        p.then((data)=>{
+            this.data=data;
+            this.drawChart();
+        });
+        return p;
+    }
+
+    drawChart(){
+        let data = this.data;
+        console.log(this.data);
+        data = data.filter((d)=>
+            d.year >= d3.min(data, (d)=>d.year) && d.year <=d3.max(data, (d)=>d.year));
+
+        this.y = d3.scale.linear()
+            .range([this.height, this.margin.bottom]);
+
+        this.x.domain(data.map((d)=>d.year));
+        this.y.domain([0, d3.max(data, (d) => Number(d.total))]);
+
+        //AXIS
+        this.xAxis = d3.svg.axis().scale(this.x).orient('bottom')
+            .tickValues(this.x.domain().filter((d,i) => !(i % 5)));
+        this.yAxis = d3.svg.axis().scale(this.y).orient('left');
+
+        this.chart.append('g')
+            .classed('axis x', true)
+            .attr('transform', `translate(0, ${this.height})`)
+            .call(this.xAxis);
+        this.chart.append('g')
+            .classed('axis y', true)
+            .attr('transform', `translate(${this.margin.left}, 0)`)
+            .call(this.yAxis);
+
+        this.bars = this.chart.append('g').classed('bars',true)
+            .selectAll('rect')
+            .data(data)
+            .enter()
+            .append('rect')
+            .style('x', (d) => {
+                return this.x(d.year);
+            })
+            .style('y', () => this.y(0))
+            .style('width', this.x.rangeBand())
+            .style('height', 0);
+        //CSS ANIMATION
+        setTimeout(()=>{
+            this.bars.classed('bar', true)
+                .style('height', (d) => this.height - this.y(+d.total))
+                .style('y', (d) => this.y(+d.total))
+        }, 1000);
+    }
+}
+
+export class InteractivePrisonChart extends PrisonPopulationChart{
+    constructor(path){
+        let p = super(path);
+        this.scenes = require('./data/prison_scenes');
+
+        this.scenes.forEach((v, i) => {
+            console.log(this);
+            v.cb = ['loadScene' + i].bind(this);
+            console.log(v);
+        });
+        p.then(()=>this.addUIElements());
+    }
+}

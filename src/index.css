@@ -15,6 +15,7 @@ html, body{
 
 .bar {
     fill: steelblue;
+    transition: all 1s steps(5, end);
 
 }
 
