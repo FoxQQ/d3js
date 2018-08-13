@@ -15,8 +15,16 @@ html, body{
 
 .bar {
     fill: steelblue;
-    transition: all 1s steps(5, end);
+    transition: all 1s ease-in;
 
+}
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+.bar.selected {
+    stroke: black;
 }
 
 .axis path,

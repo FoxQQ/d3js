@@ -332,11 +332,28 @@ export class GeoDemo extends BasicChart{
                 .classed('land',true);
             addToMap(cult, 'ne_50m_admin_0_countries')
                 .classed('admin',true);
-            addToMap(urban, 'ne_10m_urban_areas')
-                .classed('urban', true);
-            addToMap(sea,'ne_50m_rivers_lake_centerlines')
-                .classed('water',true);
+           // addToMap(urban, 'ne_10m_urban_areas')
+             //   .classed('urban', true);
+           // addToMap(sea,'ne_50m_rivers_lake_centerlines')
+          //      .classed('water',true);
+            zoomable();
+        }
 
+        function zoomable(){
+            chart.call(d3.behavior.zoom()
+                .center([chart.attr('width') / 2, chart.attr('height') / 2])
+                .scale(projection.scale())
+                .on('zoom', () => onzoom()));
+        }
+
+        function onzoom(){
+            let scaleFactor = d3.event.scale / projection.scale();
+            chart.attr('transform', `translate(${d3.event.translate})
+                    scale(${scaleFactor})`);
+            d3.selectAll('line.route').each(function() {
+                d3.select(this).style('stroke-width', `${ 2 /
+                scaleFactor}px`);
+            });
         }
     }
 

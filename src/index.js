@@ -9,13 +9,23 @@
 
 ///////////////chapter 3
 //import 'babel-polyfill';
-//import ch3 from './chapter3.js';
+//import {ch3, GeoDemo} from './chapter3.js';
 //ch3();
+//new GeoDemo();
 
 ///////////////chapter 4
 //EASES
-import {chapter4, Spirograph, PrisonPopulationChart, InteractivePrisonChart} from "./chapter4";
+import {
+    chapter4,
+    Spirograph,
+    PrisonPopulationChart,
+    InteractivePrisonChart,
+    DraggablePrisonChart,
+    BrushPrisonChart
+} from "./chapter4";
 //new chapter4();
 //new Spirograph();
 //new PrisonPopulationChart('./data/uk_prison_data_1900-2015.csv');
-new InteractivePrisonChart('./data/uk_prison_data_1900-2015.csv');
+//new InteractivePrisonChart('./data/uk_prison_data_1900-2015.csv');
+//new DraggablePrisonChart('./data/uk_prison_data_1900-2015.csv');
+new BrushPrisonChart('./data/uk_prison_data_1900-2015.csv');

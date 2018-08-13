@@ -150,7 +150,12 @@ export class PrisonPopulationChart extends BasicChart {
             .enter()
             .append('rect')
             .style('x', (d) => {
-                return this.x(d.year);
+                let x = this.x(d.year);
+                return x;
+            })
+            .attr('fill-opacity',(d)=> {
+                let x = this.x(d.year);
+                return x>=this.margin.left?1:0.0;
             })
             .style('y', () => this.y(0))
             .style('width', this.x.rangeBand())
@@ -167,13 +172,218 @@ export class PrisonPopulationChart extends BasicChart {
 export class InteractivePrisonChart extends PrisonPopulationChart{
     constructor(path){
         let p = super(path);
+        let currentobj = this;
+
         this.scenes = require('./data/prison_scenes');
 
-        this.scenes.forEach((v, i) => {
-            console.log(this);
-            v.cb = ['loadScene' + i].bind(this);
-            console.log(v);
-        });
+        this.scenes.forEach(
+            (v, i) =>  v.cb = this['loadScene' + i].bind(this));//.bind(this));
         p.then(()=>this.addUIElements());
+        console.log(this.scenes);
+        this.height =window.innerHeight*2/3;
+        this.chart.attr('height', this.height);
+        this.svg.attr('height', this.height + 100);
+        this.margin.right = 10;
+        this.margin.bottom = 10;
+    }
+
+    loadScene0(){
+        this.clearSelected().then(()=>this.updateChart());
+        this.words.html('');
+    }
+    loadScene1(){
+        let scene = this.scenes[1];
+        this.clearSelected().then(()=>{
+            this.updateChart(this.data.filter((d)=>
+                d3.range(scene.domain[0], scene.domain[1]).indexOf(Number(d.year)) >-1
+            ))
+                .then(() => this.selectBars(d3.range(1914, 1918)));
+        });
+        this.words.html(scene.copy);
+    }
+    loadScene2(){
+        let scene = this.scenes[2];
+        this.clearSelected().then(()=>{
+            this.updateChart(this.data.filter((d)=>
+                d3.range(scene.domain[0], scene.domain[1]).indexOf(Number(d.year)) >-1
+            ))
+                .then(() => this.selectBars(d3.range(1939, 1945)));
+        });
+        this.words.html(scene.copy);
+    }
+    loadScene3(){
+        let scene = this.scenes[3];
+        this.clearSelected().then(
+            ()=>this.updateChart(this.data.filter((d)=>
+                d3.range(scene.domain[0], scene.domain[1]).indexOf(Number(d.year)) >-1)));
+        this.words.html(scene.copy);
+    }
+    loadScene4(){
+        let scene = this.scenes[4];
+        this.clearSelected().then(()=>{
+            this.updateChart(this.data.filter((d)=>
+                d3.range(scene.domain[0], scene.domain[1]).indexOf(Number(d.year)) >-1
+                ))
+                .then(() => this.selectBars([1993]));
+        });
+        this.words.html(scene.copy);
+    }
+
+    clearSelected(){
+        return new Promise((res,rej)=>
+        {
+            d3.selectAll('.selected').classed('selected', false);
+            res();
+        })
+    }
+
+    selectBars(years){
+        this.bars.filter((d)=>years.indexOf(
+            Number(d.year))>-1).classed('selected', true);
+    }
+
+    updateChart(data = this.data){
+        return new Promise((res, rej) => {
+           let bars = this.chart.selectAll('.bar').data(data);
+
+           this.x.domain(data.map((d)=>d.year));
+           this.y.domain([0, d3.max(data, (d)=> Number(d.total))]);
+
+           this.chart.selectAll('.axis.x').call(
+               d3.svg.axis().scale(this.x).orient('bottom')
+                   .tickValues(this.x.domain().filter((d,i)=>!(i%6))));
+           this.chart.selectAll('.axis.y')
+               .call(this.yAxis);
+
+           bars.style('x', (d)=>this.x(d.year))
+               .style('width', this.x.rangeBand())
+               .style('height', (d)=>this.height-this.y(+d.total))
+               .style('y', (d)=>this.y(+d.total));
+           bars.enter().append('rect')
+               .style('x', (d)=>this.x(d.year))
+               .style('width', this.x.rangeBand())
+               .style('height', (d)=>this.height-this.y(+d.total))
+               .style('y', (d)=>this.y(+d.total))
+               .classed('bar', true);
+           bars.exit().remove()
+
+            res();
+
+        });
+    }
+
+    addUIElements(){
+        this.buttons =d3.select('#chart')
+            .append('div')
+            .classed('buttons', true)
+            .selectAll('.button')
+            .data(this.scenes).enter().append('button')
+            .classed('scene', true)
+            .text((d) => d.label)
+            .on('click', (d) => d.cb())
+            .on('touchstart', (d) => d.cb());
+
+        this.words = d3.select('#chart').append('div');
+        this.words.append('words', true);
+    }
+}
+
+export class DraggablePrisonChart extends InteractivePrisonChart {
+    constructor(path) {
+        let p = super(path);
+        this.x.rangeBands([this.margin.left, this.width * 14])
+    }
+
+    addUIElements() {
+        let bars = d3.select('.bars').on
+        ('transitionend', () => {
+                let dragContainer = this.chart.append('rect')
+                    .classed('bar-container', true)
+                    .attr('width', bars.node().getBBox().width)
+                    .attr('height', bars.node().getBBox().height)
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('fill-opacity', 0);
+
+                let drag = d3.behavior.drag().on('drag', ()=>{
+                   let barsTransform = d3.transform(bars.attr('transform'));
+
+                   let xAxisTransform = d3.transform(d3.select('.axis.x').attr('transform'));
+                   bars.attr('transform',
+                       `translate(${barsTransform.translate[0] + d3.event.dx}, 0)`);
+                   let allBars = d3.selectAll('.bar');
+                   allBars.attr('fill-opacity',(d, i) =>{
+                        
+                       return this.x(d.year)+barsTransform.translate[0]>=this.margin.left?1:0;
+
+                   });
+
+                    //each((d, i)=>console.log(this.x(d.year), i));
+
+                  // bars.attr('fill-opacity',this.x>50?0.9:0.1);
+
+                   d3.select('.axis.x').attr('transform',
+                        `translate(${xAxisTransform.translate[0] + d3.event.dx},
+                                    ${xAxisTransform.translate[1]})`)
+                });
+                dragContainer.call(drag);
+            }
+
+
+        );
+    }
+}
+
+export class BrushPrisonChart extends InteractivePrisonChart{
+    constructor(path){
+        super(path);
+    }
+    addUIElements(){
+        this.chart.append('g')
+            .classed('brush', true)
+            .call(d3.svg.brush().x(this.x).y(this.y)
+                .on('brushstart', this.brushstart.bind(this))
+                .on('brush', this.brushmove.bind(this))
+                .on('brushend', this.brushend.bind(this)));
+    }
+    brushstart(){
+        //let n = new Date().getTime();
+        //console.log(n,':',d3.event.target.extent());
+    }
+    brushmove() {
+        let e = d3.event.target.extent();
+        //let n = new Date().getTime();
+        //console.log(n,':',e);
+        d3.selectAll('.bar').classed('selected', (d) =>
+            e[0][0] <= this.x(d.year)
+            && this.x(d.year) <= e[1][0]
+        );
+    }
+    brush(){}
+    brushend(){
+        let selected = d3.selectAll('.selected');
+        // Clear brush object
+        d3.event.target.clear();
+        d3.select('g.brush').call(d3.event.target);
+        // Zoom to selection
+        let first = selected[0][0];
+        let last = selected[0][selected.size() - 1]
+        let startYear = d3.select(first).data()[0].year;
+        let endYear = d3.select(last).data()[0].year;
+        this.clearSelected().then(() => {
+            this.updateChart(this.data.filter((d) =>
+                d3.range(startYear, endYear).indexOf(Number(d.year)) > -1));
+        });
+        let hitbox = this.svg
+            .append('rect')
+            .classed('hitbox', true)
+            .attr('width', this.svg.attr('width'))
+            .attr('height', this.svg.attr('height'))
+            .attr('fill-opacity', 0);
+        hitbox.on('contextmenu', this.rightclick.bind(this));
+    }
+    rightclick(){
+        this.updateChart();
+        this.addUIElements();
     }
 }
